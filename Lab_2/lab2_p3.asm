@@ -34,5 +34,5 @@ while:
   
 fin:
  sw a0, varZ, s2 # assign varZ value stored in a0
- sw a1, varI, s3 # assign varZ value stored in a1 
+ sw a1, varI, s3 # assign varI value stored in a1 
 
