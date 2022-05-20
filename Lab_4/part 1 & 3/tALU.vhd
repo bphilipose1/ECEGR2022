@@ -1,0 +1,138 @@
+--------------------------------------------------------------------------------
+--
+-- Test Bench for LAB #4
+--
+--------------------------------------------------------------------------------
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.all;
+USE ieee.numeric_std.ALL;
+
+ENTITY testALU_vhd IS
+END testALU_vhd;
+
+ARCHITECTURE behavior OF testALU_vhd IS 
+
+	-- Component Declaration for the Unit Under Test (UUT)
+	COMPONENT ALU
+		Port(	DataIn1: in std_logic_vector(31 downto 0);
+			DataIn2: in std_logic_vector(31 downto 0);
+			ALUCtrl: in std_logic_vector(4 downto 0);
+			Zero: out std_logic;
+			ALUResult: out std_logic_vector(31 downto 0) );
+	end COMPONENT ALU;
+
+	--Inputs
+	SIGNAL datain_a : std_logic_vector(31 downto 0) := (others=>'0');
+	SIGNAL datain_b : std_logic_vector(31 downto 0) := (others=>'0');
+	SIGNAL control	: std_logic_vector(4 downto 0)	:= (others=>'0');
+
+	--Outputs
+	SIGNAL result   :  std_logic_vector(31 downto 0);
+	SIGNAL zeroOut  :  std_logic;
+
+BEGIN
+
+	-- Instantiate the Unit Under Test (UUT)
+	uut: ALU PORT MAP(
+		DataIn1 => datain_a,
+		DataIn2 => datain_b,
+		ALUCtrl => control,
+		Zero => zeroOut,
+		ALUResult => result
+	);
+	
+
+	tb : PROCESS
+	BEGIN
+
+		-- Wait 100 ns for global reset to finish
+		wait for 100 ns;
+
+		-- Start testing the ALU
+
+		--add
+		datain_a <= X"00000005";	-- DataIn in hex
+		datain_b <= X"00000004";
+		control  <= "00000";		-- Control in binary )
+		
+		wait for 20 ns; 			-- result = 0x00000009  and zeroOut = 0
+
+		--sub
+		datain_a <= X"00000005";	-- DataIn in hex
+		datain_b <= X"00000005";
+		control  <= "00001";		-- Control in binary
+		
+		wait for 20 ns; 			-- result = 0x00000000  and zeroOut = 1
+
+		--addi
+		datain_a <= X"00000005";	-- DataIn in hex
+		datain_b <= X"00000005";
+		control  <= "00010";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0x0000000A  and zeroOut = 0
+
+		--and
+		datain_a <= "11111111111111111111111111111111" ;	-- DataIn in binary
+		datain_b <= "10101010101010101010101010101010";
+		control  <= "00011";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0xAAAAAAAA  and zeroOut = 0
+
+		--andi
+		datain_a <= "11111111111111111111111111111111" ;	-- DataIn in binary
+		datain_b <= "10101010101010101010101010101010";
+		control  <= "00100";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0xAAAAAAAA  and zeroOut = 0
+
+		--or
+		datain_a <= "10101010101010101010101010101010";	-- DataIn in binary
+		datain_b <= "10101010101010101010101010101010";
+		control  <= "00101";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0xAAAAAAAA  and zeroOut = 0
+
+		--ori
+		datain_a <= "10101010101010101010101010101010";	-- DataIn in binary
+		datain_b <= "10101010101010101010101010101010";
+		control  <= "00110";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0xAAAAAAAA  and zeroOut = 0
+
+		--sll
+		datain_a <= X"00000001";	-- DataIn in hex
+		datain_b <= X"00000003";
+		control  <= "00111";		-- Control in binary
+		
+		wait for 20 ns; 			-- result = 0x00000008  and zeroOut = 0
+
+		--slli
+		datain_a <= X"00000001";	-- DataIn in hex
+		datain_b <= X"00000003";
+		control  <= "01000";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0x00000008  and zeroOut = 0
+
+		--srl
+		datain_a <= X"00000008";	-- DataIn in hex
+		datain_b <= X"00000003";
+		control  <= "01001";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0x00000001  and zeroOut = 0
+
+		--srli
+		datain_a <= X"00000008";	-- DataIn in hex
+		datain_b <= X"00000003";
+		control  <= "01010";		-- Control in binary 
+		
+		wait for 20 ns; 			-- result = 0x00000001  and zeroOut = 0
+
+
+
+
+
+		wait; -- will wait forever
+	END PROCESS;
+
+END;
