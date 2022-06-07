@@ -137,12 +137,13 @@ begin
 	'0';
 
 	--For immidiate select
-	signExtend <= (others => '1') when (((instruction1(31) = '1') AND (immGen /= "01")) OR ((instruction1(7) = '1') and (immGen = "01"))) else
-	(others => '0');
+	with instruction1(31) select
+	signExtend <= (others => '1') when '1',
+	(others => '0') when others;
 	
 	with immGen select
 	immidiatepart <= (signExtend(19 downto 0) & instruction1(31 downto 20)) when "10", --I-type
-	(signExtend(19 downto 0) & instruction1(7) & instruction1(30 downto 25) & instruction1(11 downto 8) & '0') when "01", --B-type
+	(signExtend(18 downto 0) & instruction1(31) & instruction1(7) & instruction1(30 downto 25) & instruction1(11 downto 8) & '0') when "01", --B-type
 	(signExtend(19 downto 0) & instruction1(31 downto 25) & instruction1(11 downto 7)) when "11", --S-type
 	(instruction1(31 downto 12) & "000000000000") when others; --U-type/R-type
 	
