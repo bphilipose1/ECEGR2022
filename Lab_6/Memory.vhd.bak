@@ -1,0 +1,186 @@
+--------------------------------------------------------------------------------
+--
+-- LAB #5 - Memory and Register Bank
+--
+--------------------------------------------------------------------------------
+LIBRARY ieee;
+Use ieee.std_logic_1164.all;
+Use ieee.numeric_std.all;
+Use ieee.std_logic_unsigned.all;
+
+entity RAM is
+    Port(Reset:	  in std_logic;
+	 Clock:	  in std_logic;	 
+	 OE:      in std_logic;
+	 WE:      in std_logic;
+	 Address: in std_logic_vector(29 downto 0);
+	 DataIn:  in std_logic_vector(31 downto 0);
+	 DataOut: out std_logic_vector(31 downto 0));
+end entity RAM;
+
+architecture staticRAM of RAM is
+
+   type ram_type is array (0 to 127) of std_logic_vector(31 downto 0);
+   signal i_ram : ram_type;
+
+begin
+
+  RamProc: process(Clock, Reset, OE, WE, Address) is
+
+  begin
+    if Reset = '1' then
+      for i in 0 to 127 loop   
+          i_ram(i) <= X"00000000";
+      end loop;
+    end if;
+
+	--Storing at Address
+    if falling_edge(Clock) AND WE = '1' AND (to_integer(unsigned(Address(7 DOWNTO 0))) >= 0) AND (to_integer(unsigned(Address)) <= 127) then
+	    i_ram(to_integer(unsigned(Address(7 DOWNTO 0)))) <= DataIn;	
+    end if;
+
+
+	--Reading from Address
+    if (OE = '0') AND (to_integer(unsigned(Address)) < 127) AND (to_integer(unsigned(Address)) >= 0) then
+	DataOut <= i_ram(to_integer(unsigned(Address(7 DOWNTO 0))));
+    else 
+	DataOut <= (others => 'Z');
+    end if;
+
+ 
+	
+  end process RamProc;
+
+end staticRAM;	
+
+
+--------------------------------------------------------------------------------
+LIBRARY ieee;
+Use ieee.std_logic_1164.all;
+Use ieee.numeric_std.all;
+Use ieee.std_logic_unsigned.all;
+
+entity Registers is
+    Port(ReadReg1: in std_logic_vector(4 downto 0); 
+         ReadReg2: in std_logic_vector(4 downto 0); 
+         WriteReg: in std_logic_vector(4 downto 0);
+	 WriteData: in std_logic_vector(31 downto 0);
+	 WriteCmd: in std_logic;
+	 ReadData1: out std_logic_vector(31 downto 0);
+	 ReadData2: out std_logic_vector(31 downto 0));
+end entity Registers;
+
+architecture remember of Registers is
+	component register32
+  	    port(datain: in std_logic_vector(31 downto 0);
+		 enout32,enout16,enout8: in std_logic;
+		 writein32, writein16, writein8: in std_logic;
+		 dataout: out std_logic_vector(31 downto 0));
+	end component;
+	
+	SIGNAL x0out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL raout: std_logic_vector(31 DOWNTO 0);
+	SIGNAL spout: std_logic_vector(31 DOWNTO 0);
+	SIGNAL gpout: std_logic_vector(31 DOWNTO 0);
+	SIGNAL tpout: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t0out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t1out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t2out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s0out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s1out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a0out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a1out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a2out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a3out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a4out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a5out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a6out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL a7out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s2out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s3out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s4out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s5out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s6out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s7out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s8out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s9out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s10out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL s11out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t3out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t4out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t5out: std_logic_vector(31 DOWNTO 0);
+	SIGNAL t6out: std_logic_vector(31 DOWNTO 0);
+
+	SIGNAL writeSel: std_logic_vector(31 DOWNTO 0);
+	SIGNAL writer: std_logic_vector(5 DOWNTO 0);
+
+begin
+	writer <= WriteCmd & WriteReg;
+	WITH writer SELECT
+	writeSel <= "00000000000000000000000000000010" WHEN "100001",--x1
+	"00000000000000000000000000000100" WHEN "100010",--x2
+	"00000000000000000000000000001000" WHEN "100011",--x3
+	"00000000000000000000000000010000" WHEN "100100",--x4
+	"00000000000000000000000000100000" WHEN "100101",--x5
+	"00000000000000000000000001000000" WHEN "100110",--x6
+	"00000000000000000000000010000000" WHEN "100111",--x7
+	"00000000000000000000000100000000" WHEN "101000",--x8
+	"00000000000000000000001000000000" WHEN "101001",--x9
+	"00000000000000000000010000000000" WHEN "101010",--x10
+	"00000000000000000000100000000000" WHEN "101011",--x11
+	"00000000000000000001000000000000" WHEN "101100",--x12
+	"00000000000000000010000000000000" WHEN "101101",--x13
+	"00000000000000000100000000000000" WHEN "101110",--x14
+	"00000000000000001000000000000000" WHEN "101111",--x15
+	"00000000000000010000000000000000" WHEN "110000",--x16
+	"00000000000000100000000000000000" WHEN "110001",--x17
+	"00000000000001000000000000000000" WHEN "110010",--x18
+	"00000000000010000000000000000000" WHEN "110011",--x19
+	"00000000000100000000000000000000" WHEN "110100",--x20
+	"00000000001000000000000000000000" WHEN "110101",--x21
+	"00000000010000000000000000000000" WHEN "110110",--x22
+	"00000000100000000000000000000000" WHEN "110111",--x23
+	"00000001000000000000000000000000" WHEN "111000",--x24
+	"00000010000000000000000000000000" WHEN "111001",--x25
+	"00000100000000000000000000000000" WHEN "111010",--x26
+	"00001000000000000000000000000000" WHEN "111011",--x27
+	"00010000000000000000000000000000" WHEN "111100",--x28
+	"00100000000000000000000000000000" WHEN "111101",--x29
+	"01000000000000000000000000000000" WHEN "111110",--x30
+	"10000000000000000000000000000000" WHEN "111111",--x31
+	(others => '0') WHEN OTHERS;
+	
+
+
+    -- Add your code here for the Register Bank implementation 
+	FullRegister: FOR k IN 1 to 31 GENERATE
+	xi:register32 PORT MAP (WriteData, '0', '1', '1', writeSel(i), '0', '0', aiout); 
+	END GENERATE;
+
+	
+	
+	WITH ReadReg1 SELECT
+	ReadData1 <= a0out WHEN "01010",
+	a1out WHEN "01011",
+	a2out WHEN "01100",
+	a3out WHEN "01101",
+	a4out WHEN "01110",
+	a5out WHEN "01111",
+	a6out WHEN "10000",
+	a7out WHEN "10001",
+	(others => '0') WHEN OTHERS;
+
+	WITH ReadReg2 SELECT
+	ReadData2 <= a0out WHEN "01010",
+	a1out WHEN "01011",
+	a2out WHEN "01100",
+	a3out WHEN "01101",
+	a4out WHEN "01110",
+	a5out WHEN "01111",
+	a6out WHEN "10000",
+	a7out WHEN "10001",
+	(others => '0') WHEN OTHERS;
+
+end remember;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
